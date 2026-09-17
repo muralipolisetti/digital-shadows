@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SecureApp - Security dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="bar">
+    <div>
+      <h1>SecureApp</h1>
+      <p class="sub">File integrity monitoring for {{ monitored_file }}</p>
+    </div>
+    <nav>
+      <a href="/integrity">Run a check</a>
+      <a href="/api/integrity">JSON</a>
+      {% if user %}<a href="/logout">Sign out ({{ user }})</a>{% else %}<a href="/login">Sign in</a>{% endif %}
+    </nav>
+  </header>
+
+  {% if error %}
+    <section class="card status error">
+      <span class="verdict">Check failed</span>
+      <span class="detail">{{ error }}</span>
+    </section>
+  {% else %}
+    <section class="card status {{ 'alert' if result.tampered else 'safe' }}">
+      <span class="verdict">
+        {% if result.tampered %}&#128308; Tampering detected{% else %}&#128994; Safe{% endif %}
+      </span>
+      <span class="detail">
+        {{ result.file }} &middot; checked {{ checked_at }}
+        {% if result.tampered %}&middot; the file no longer matches its baseline{% endif %}
+      </span>
+    </section>
+
+    <section class="card">
+      <h2>SHA-256 comparison</h2>
+      <dl class="hashes">
+        <dt>Expected (trusted baseline)</dt>
+        <dd>{{ result.expected_hash }}</dd>
+        <dt>Current (calculated just now)</dt>
+        <dd class="{{ 'mismatch' if result.tampered else '' }}">{{ result.current_hash }}</dd>
+      </dl>
+      <p style="margin-top:1.2rem"><a class="btn" href="/integrity">Check again</a></p>
+    </section>
+  {% endif %}
+
+  {% if recent_log %}
+  <section class="card">
+    <h2>Recent audit entries</h2>
+    <pre class="log">{% for line in recent_log %}{{ line }}
+{% endfor %}</pre>
+  </section>
+  {% endif %}
+
+  <footer class="note">
+    SecureApp detects unauthorised changes, it does not block them. Anyone with
+    write access can still edit {{ monitored_file }}; changing a single byte
+    produces a different SHA-256 hash, which is how the change is caught.
+  </footer>
+
+</div>
+</body>
+</html>

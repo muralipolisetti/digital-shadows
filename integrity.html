@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SecureApp - Integrity check</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="bar">
+    <div>
+      <h1>Integrity check</h1>
+      <p class="sub">Run at {{ checked_at }} on {{ monitored_file }}</p>
+    </div>
+    <nav>
+      <a href="/">Dashboard</a>
+      <a href="/api/integrity">JSON</a>
+      {% if user %}<a href="/logout">Sign out</a>{% endif %}
+    </nav>
+  </header>
+
+  {% if error %}
+    <section class="card status error">
+      <span class="verdict">Check failed</span>
+      <span class="detail">{{ error }}</span>
+    </section>
+    <p class="notice">
+      Fix the problem above, then run the check again. Nothing was written to
+      the baseline.
+    </p>
+  {% else %}
+    <section class="card status {{ 'alert' if result.tampered else 'safe' }}">
+      <span class="verdict">
+        {% if result.tampered %}&#128308; Tampering detected{% else %}&#128994; Safe{% endif %}
+      </span>
+      <span class="detail">status = {{ result.status }}</span>
+    </section>
+
+    <section class="card">
+      <dl class="hashes">
+        <dt>Monitored file</dt>
+        <dd>{{ result.file }}</dd>
+        <dt>Expected (trusted baseline)</dt>
+        <dd>{{ result.expected_hash }}</dd>
+        <dt>Current (calculated just now)</dt>
+        <dd class="{{ 'mismatch' if result.tampered else '' }}">{{ result.current_hash }}</dd>
+      </dl>
+      <p style="margin-top:1.2rem"><a class="btn" href="/integrity">Check again</a></p>
+    </section>
+
+    {% if result.tampered %}
+    <p class="notice">
+      The baseline was not changed. Restore the original contents of
+      {{ result.file }} and check again, or record a new baseline on purpose
+      with <code>python create_baseline.py</code>.
+    </p>
+    {% endif %}
+  {% endif %}
+
+</div>
+</body>
+</html>

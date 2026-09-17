@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SecureApp - Sign in</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="login-wrap">
+
+  <h1>SecureApp</h1>
+  <p class="sub">Sign in to view the integrity dashboard.</p>
+
+  <form class="card" method="POST" action="/login" autocomplete="off">
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username" required autofocus>
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required>
+
+    <p style="margin-top:1.1rem"><button class="btn" type="submit">Sign in</button></p>
+
+    {% if error %}<p class="notice">{{ error }}</p>{% endif %}
+  </form>
+
+  <footer class="note">
+    Prototype login for the hackathon demo. Credentials are checked against a
+    salted PBKDF2 hash; no password is stored, logged or printed. Replace this
+    with real authentication before any production use.
+  </footer>
+
+</div>
+</body>
+</html>
